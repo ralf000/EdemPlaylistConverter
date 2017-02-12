@@ -1,6 +1,7 @@
 <?php
 
 namespace app\exceptions;
+use app\components\logger\Logger;
 
 /**
  * Class ABaseException
@@ -8,6 +9,15 @@ namespace app\exceptions;
  */
 abstract class ABaseException extends \Exception
 {
+    /**
+     * ABaseException constructor.
+     */
+    public function __construct()
+    {
+        $context = ['Класс ошибки: ' . static::class, 'Файл: ' . $this->getFile(), 'Строка: ' . $this->getLine()];
+        (new Logger())->error($this->getMessage(), $context);
+    }
+
     /**
      * @return string
      */

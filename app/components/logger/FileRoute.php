@@ -14,7 +14,7 @@ class FileRoute extends Route
     /**
      * @var string Путь к файлу
      */
-    private $filePath = '';
+    public $filePath = '';
 
     /**
      * @var string Шаблон сообщения
@@ -37,6 +37,7 @@ class FileRoute extends Route
     public function log($level, $message, array $context = array())
     {
         $message = $this->initMessage($level, $message, $context);
+        header('Content-Type: text/html; charset=utf-8');
         file_put_contents($this->filePath, $message . PHP_EOL, FILE_APPEND);
     }
 

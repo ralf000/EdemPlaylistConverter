@@ -46,6 +46,6 @@ abstract class Route extends AbstractLogger
      */
     public function contextStringify(array $context = [])
     {
-        return !empty($context) ? json_encode($context) : null;
+        return !empty($context) ? json_encode($context, JSON_UNESCAPED_UNICODE) : null;
     }
 }

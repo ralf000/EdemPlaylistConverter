@@ -1,6 +1,6 @@
 <?php
 
-return [
+return ['myChannels' =>
     [
         'name' => 'Rock TV',
         'group' => 'музыка',

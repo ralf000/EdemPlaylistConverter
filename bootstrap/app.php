@@ -7,8 +7,6 @@ use Noodlehaus\Config;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-$app = new App();
-
 /**
  * init logger
  */
@@ -17,10 +15,9 @@ $logger->routes->attach(new FileRoute([
     'filePath' => 'logs/logs.txt',
     'isEnabled' => true
 ]));
-$app->set($logger);
-
+App::set('logger', $logger);
 /**
  * init config
  */
-$config = new Config(__DIR__ . '../config');
-$app->set($config);
+$config = new Config(__DIR__ . '/../config');
+App::set('config', $config);

@@ -31,6 +31,7 @@ abstract class AFile
 
         if (!is_null($this->descriptor))
             return null;
+        
         $this->descriptor = fopen($path, 'r');
         if (!$this->descriptor)
             throw new FileException('Не удалось открыть файл');
@@ -38,18 +39,7 @@ abstract class AFile
         $this->path = $path;
     }
 
-    /**
-     * @param \Closure $closure
-     */
-    protected function handleFile(\Closure $closure)
-    {
-        while (!feof($this->descriptor)) {
-            $line = fgets($this->descriptor);
-            $closure($line);
-        }
-    }
-
-    abstract protected function handleString($line);
+    abstract protected function handleFile();
 
     /**
      * @return bool

@@ -39,11 +39,12 @@ abstract class AFile
     abstract public function handle();
 
     /**
+     * @param $descriptor
      * @return bool
      */
-    protected function close() : bool
+    protected function close($descriptor) : bool
     {
-        return (!$this->descriptor) ? fclose($this->descriptor) : false;
+        return fclose($descriptor);
     }
 
     /**

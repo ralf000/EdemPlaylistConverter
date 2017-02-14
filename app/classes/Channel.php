@@ -32,7 +32,7 @@ class Channel
     {
         return strtr($this->template, [
             '{group}' => $this->channel['group'],
-            '{title}' => ucwords($this->channel['title']),
+            '{title}' => $this->mb_ucwords($this->channel['title']),
             '{url}' => $this->channel['url'],
         ]);
     }
@@ -67,6 +67,12 @@ class Channel
     public function setGroup($group)
     {
         $this->channel['group'] = $group;
+    }
+
+    private function mb_ucwords($str)
+    {
+        $str = mb_convert_case($str, MB_CASE_TITLE, "UTF-8");
+        return ($str);
     }
 
 

@@ -4,6 +4,7 @@ namespace app\classes;
 
 
 use app\App;
+use app\components\logger\Logger;
 use Noodlehaus\Config;
 
 class Playlist extends AFile
@@ -24,6 +25,11 @@ class Playlist extends AFile
     private $config;
 
     /**
+     * @var int Общее количество каналов
+     */
+    private $channelCounter = 0;
+
+    /**
      * Playlist constructor.
      * @param string $path
      */
@@ -37,6 +43,7 @@ class Playlist extends AFile
     public function handle()
     {
         while (!feof($this->descriptor)) {
+
             $line = trim(fgets($this->descriptor));
 
             if (empty($line) || $line == '#EXTM3U')
@@ -46,6 +53,8 @@ class Playlist extends AFile
             if (mb_substr($line, 0, 7) == '#EXTINF') {
                 $channelData = [];
                 list(, $channelData['title']) = explode(',', $line);
+
+                $this->channelCounter++;
             } else if (mb_substr($line, 0, 7) == '#EXTGRP') {
                 //example: #EXTGRP:новости
                 list(, $channelData['group']) = explode(':', $line);
@@ -58,7 +67,7 @@ class Playlist extends AFile
                 }
             }
         }
-        $this->close();
+        $this->close($this->descriptor);
         $this->sort(SORT_ASC);
         $this->createPlaylist();
     }
@@ -75,6 +84,8 @@ class Playlist extends AFile
              */
             fwrite($descriptor, $channel->convert());
         }
+        $this->close($descriptor);
+        App::get('logger')->successCreatePlaylistLog($this->channelCounter, count($this->channels));
     }
 
     private function changeChannelAttribute()

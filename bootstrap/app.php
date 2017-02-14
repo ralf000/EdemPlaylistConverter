@@ -16,6 +16,7 @@ $logger->routes->attach(new FileRoute([
     'isEnabled' => true
 ]));
 App::set('logger', $logger);
+
 /**
  * init config
  */

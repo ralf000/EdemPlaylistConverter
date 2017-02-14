@@ -4,3 +4,5 @@ edem_pl.m3u8
 vendor
 composer.phar
 logs
+security
+.htaccess

@@ -3,6 +3,7 @@
 namespace app\components\logger;
 
 
+use app\App;
 use Psr\Log\AbstractLogger;
 
 class Logger extends AbstractLogger
@@ -30,6 +31,16 @@ class Logger extends AbstractLogger
                 continue;
             $route->log($level, $message, $context);
         }
+    }
+
+    public function successCreatePlaylistLog(int $allChannels, int $remainingChannels)
+    {
+        $message = 'Всего каналов: ' . $allChannels;
+        $message .= ' | ';
+        $message .= 'Удалено: ' . ($allChannels - $remainingChannels);
+        $message .= ' | ';
+        $message .= 'Осталось: ' . $remainingChannels;
+        App::get('logger')->info($message);
     }
 
 }

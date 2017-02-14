@@ -1,4 +1,8 @@
 <?php
+/**
+ * init strict mode
+ */
+declare(strict_types = 1);
 
 require __DIR__ . '/autoload.php';
 
@@ -9,4 +13,6 @@ try {
     $playlist->handle();
 } catch (\app\exceptions\FileException $e) {
     echo $e->getException();
+} catch (Exception $e) {
+    echo $e->getMessage();
 }

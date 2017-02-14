@@ -11,8 +11,14 @@ use Exception;
  */
 abstract class ABaseException extends \Exception
 {
+    /**
+     * @var string Сообщение об ошибке
+     */
+    protected $message = '';
+
     public function __construct($message)
     {
+        $this->message = $message;
         $context = ['Класс ошибки: ' . static::class, 'Файл: ' . $this->getFile(), 'Строка: ' . $this->getLine()];
         App::get('logger')->error($message, $context);
     }
@@ -22,8 +28,7 @@ abstract class ABaseException extends \Exception
      */
     public function getException()
     {
-        $output = get_class($this) . '<br>';
-        $output .= "<table>{$this->xdebug_message}</table>";
+        $output = "<table>{$this->xdebug_message}</table>";
         return $output;
     }
 }

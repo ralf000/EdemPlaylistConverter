@@ -1,6 +1,6 @@
 <?php
 
-return ['ExcludeChannels' =>
+return ['excludeChannels' =>
     [
         'ATV',
         'Ararat',

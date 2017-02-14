@@ -26,9 +26,6 @@ abstract class AFile
      */
     public function __construct($path)
     {
-        if (!is_file($path))
-            throw new FileException('Неверный путь до файла');
-
         if (!is_null($this->descriptor))
             return null;
         
@@ -39,23 +36,24 @@ abstract class AFile
         $this->path = $path;
     }
 
-    abstract protected function handleFile();
+    abstract public function handle();
 
     /**
      * @return bool
      */
-    public function close() : bool
+    protected function close() : bool
     {
         return (!$this->descriptor) ? fclose($this->descriptor) : false;
     }
 
     /**
+     * @param $path
      * @return bool
      * @throws FileException
      */
-    public function delete() : bool
+    protected function delete($path) : bool
     {
-        if (!unlink($this->path))
+        if (!unlink($path))
             throw new FileException('Не могу удалить файл');
         else
             return true;

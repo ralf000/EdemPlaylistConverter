@@ -6,56 +6,35 @@ namespace app\classes;
 class Channel
 {
     /**
-     * @var array [header => 'header', url => 'url']
+     * @var array [title => 'title', group => 'group', url => 'url']
      */
     private $channel = [];
 
     /**
-     * @var string
+     * @var string Шаблон для создания плейлиста
      */
-    private $title = '';
-    /**
-     * @var string
-     */
-    private $group = '';
+    private $template = '#EXTINF:0 group-title="{group}",{title}' . PHP_EOL . '{url}' . PHP_EOL;
 
     /**
      * Channel constructor.
-     * @param array $channel [title => 'title', url => 'url']
+     * @param array $channel [title => 'title', group => 'group', url => 'url']
      */
     public function __construct(array $channel)
     {
-        $this->$channel = $channel;
-        $this->parse();
+        $this->channel = array_map('mb_strtolower', $channel);
     }
 
     /**
-     * Парсит канал
-     *
-     * @return array
-     */
-    private function parse() : array
-    {
-        preg_match('~group\-title="(.*)"\s*\,\s*(\w+)~iUu', $this->channel['header'], $result);
-        if (count($result) !== 3)
-            return false;
-        
-        array_shift($result);
-        $this->group = $this->clean($result[0]);
-        $this->title = $this->clean($result[1]);
-        
-        return true;
-    }
-
-    /**
-     * Очищает строку
-     *
-     * @param string $string
+     * Конвертирует канал для создания плейлиста
      * @return string
      */
-    private function clean(string $string) : string
+    public function convert() : string
     {
-        return trim(strtolower($string));
+        return strtr($this->template, [
+            '{group}' => $this->channel['group'],
+            '{title}' => ucwords($this->channel['title']),
+            '{url}' => $this->channel['url'],
+        ]);
     }
 
     /**
@@ -63,7 +42,7 @@ class Channel
      */
     public function getTitle()
     {
-        return $this->title;
+        return $this->channel['title'];
     }
 
     /**
@@ -71,7 +50,7 @@ class Channel
      */
     public function getGroup()
     {
-        return $this->group;
+        return $this->channel['group'];
     }
 
     /**
@@ -79,7 +58,7 @@ class Channel
      */
     public function setTitle($title)
     {
-        $this->title = $title;
+        $this->channel['title'] = $title;
     }
 
     /**
@@ -87,7 +66,7 @@ class Channel
      */
     public function setGroup($group)
     {
-        $this->group = $group;
+        $this->channel['group'] = $group;
     }
 
 

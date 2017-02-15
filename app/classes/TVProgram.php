@@ -30,12 +30,12 @@ class TVProgram extends AFile implements ICreatable
     {
         $this->path = App::get('config')->get('main.inputTVProgram');
         $this->outputTVName = App::get('config')->get('main.outputTVProgramName');
-        $this->outputTVPath = __DIR__ . '/../../' . $this->outputTVName;
+        $this->outputTVPath = __DIR__ . '../../' . $this->outputTVName;
         parent::__construct($this->path);
     }
 
     /**
-     *
+     * Скачивает телепрограмму на сервер
      */
     public function create()
     {
@@ -45,6 +45,7 @@ class TVProgram extends AFile implements ICreatable
     }
 
     /**
+     * Проверяет наличие телепрограммы для каналов плейлиста
      * @throws FileException
      */
     public function check()
@@ -69,22 +70,27 @@ class TVProgram extends AFile implements ICreatable
                 $withoutProgram[] = $playlistChannelTitle;
         }
         $this->delete($this->outputTVPath);
-        $this->showChannelsWithoutProgram($withoutProgram);
+        echo $this->showChannelsWithoutProgram($withoutProgram);
     }
 
-    private function showChannelsWithoutProgram(array $withoutProgram)
+    /**
+     * Отображает каналы без телепрограммы
+     * @param array $withoutProgram
+     * @return string
+     */
+    private function showChannelsWithoutProgram(array $withoutProgram) : string
     {
         if (empty($withoutProgram)) {
-            echo '<h3>Для всех телеканалов текущего плейлиста доступна телепрограмма</h3>';
+            $output = '<h3>Для всех телеканалов текущего плейлиста доступна телепрограмма</h3>';
         } else {
             $output = '<h3>Телепрограмма не найдена для следующих телеканалов:</h3>';
             $output .= '<ul>';
             foreach ($withoutProgram as $channel) {
-                $output .= '<li>'. htmlspecialchars($channel) .'</li>';
+                $output .= '<li>' . htmlspecialchars($channel) . '</li>';
             }
             $output .= '</ul>';
-            echo $output;
         }
+        return $output;
     }
 
     /**
@@ -93,7 +99,7 @@ class TVProgram extends AFile implements ICreatable
     private function gzUnzip()
     {
         $tvInput = gzopen($this->path, 'r');
-        $tvOutput = fopen($this->outputTVName, 'w+');
+        $tvOutput = fopen($this->outputTVPath, 'w');
         if (!$tvInput || !$tvOutput)
             throw new FileException('Не удалось открыть один или несколько файлов телепрограммы');
 
@@ -104,6 +110,9 @@ class TVProgram extends AFile implements ICreatable
         $this->close($tvOutput);
     }
 
+    /**
+     * @return array
+     */
     private function getPlaylistChannels() : array
     {
         $playlist = new Playlist();

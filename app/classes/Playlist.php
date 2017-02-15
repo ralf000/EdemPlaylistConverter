@@ -70,6 +70,8 @@ class Playlist extends AFile implements ICreatable
             }
         }
         $this->close($this->descriptor);
+
+        $this->addAdditionalChannels();
         $this->sort(SORT_ASC);
         $this->createPlaylist();
     }
@@ -116,7 +118,18 @@ class Playlist extends AFile implements ICreatable
         return true;
     }
 
-    private function sort($sortDirection)
+    private function addAdditionalChannels()
+    {
+        $additionalChannels = $this->config->get('additionalChannels');
+        foreach ($additionalChannels as $additionalChannel) {
+            if (!isset($additionalChannel['group']) || empty($additionalChannel['group']))
+                $additionalChannel['group'] = 'другое';
+            $this->channels[] = new Channel($additionalChannel);
+        }
+    }
+
+    private
+    function sort($sortDirection)
     {
         return usort($this->channels, function ($a, $b) use ($sortDirection) {
             /**
@@ -133,11 +146,11 @@ class Playlist extends AFile implements ICreatable
     /**
      * @return array
      */
-    public function getChannels() : array
+    public
+    function getChannels() : array
     {
         return $this->channels;
     }
-    
 
 
 }

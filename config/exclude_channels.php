@@ -43,5 +43,6 @@ return ['excludeChannels' =>
         'Че',
         'РБК',
         'Toot',
+        'Мир',
     ]
 ];

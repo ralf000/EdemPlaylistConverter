@@ -30,7 +30,7 @@ class TVProgram extends AFile implements ICreatable
     {
         $this->path = App::get('config')->get('main.inputTVProgram');
         $this->outputTVName = App::get('config')->get('main.outputTVProgramName');
-        $this->outputTVPath = __DIR__ . '../../../' . $this->outputTVName;
+        $this->outputTVPath = __DIR__ . '/../../../' . $this->outputTVName;
         parent::__construct($this->path);
     }
 

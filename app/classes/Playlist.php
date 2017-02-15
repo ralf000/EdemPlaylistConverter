@@ -4,10 +4,12 @@ namespace app\classes;
 
 
 use app\App;
+use app\components\helpers\ArrayHelper;
+use app\components\helpers\MbString;
 use app\components\logger\Logger;
 use Noodlehaus\Config;
 
-class Playlist extends AFile
+class Playlist extends AFile implements ICreatable
 {
     /**
      * @var Channel
@@ -31,34 +33,34 @@ class Playlist extends AFile
 
     /**
      * Playlist constructor.
-     * @param string $path
      */
-    public function __construct($path)
+    public function __construct()
     {
+        $path = App::get('config')->get('main.inputPlaylist');
         parent::__construct($path);
         $this->config = App::get('config');
     }
 
 
-    public function handle()
+    public function create()
     {
         while (!feof($this->descriptor)) {
 
-            $line = trim(fgets($this->descriptor));
+            $line = MbString::mb_trim(fgets($this->descriptor));
 
             if (empty($line) || $line == '#EXTM3U')
                 continue;
 
-            //example: #EXTINF:0,РБК-ТВ
             if (mb_substr($line, 0, 7) == '#EXTINF') {
                 $channelData = [];
+                //example: #EXTINF:0,РБК-ТВ
                 list(, $channelData['title']) = explode(',', $line);
 
                 $this->channelCounter++;
             } else if (mb_substr($line, 0, 7) == '#EXTGRP') {
                 //example: #EXTGRP:новости
                 list(, $channelData['group']) = explode(':', $line);
-            } else {
+            } else if (mb_substr($line, 0, 4) == 'http') {
                 $channelData['url'] = $line;
                 $this->channel = new Channel($channelData);
                 $this->changeChannelAttribute();
@@ -74,7 +76,7 @@ class Playlist extends AFile
 
     private function createPlaylist()
     {
-        $playlistName = $this->config->get('main.outputFileName');
+        $playlistName = $this->config->get('main.outputPlaylistName');
         $playlistPath = __DIR__ . '/../../' . $playlistName;
         $descriptor = fopen($playlistPath, 'w');
         fwrite($descriptor, '#EXTM3U' . PHP_EOL);
@@ -92,24 +94,22 @@ class Playlist extends AFile
     {
         $title = $this->channel->getTitle();
 
-        $renameChannels = $this->handleConfig('renameChannels');
-        $renameChannels = $this->arrayKeysToLowerCase($renameChannels);
+        $renameChannels = $this->config->get('renameChannels');
         if (array_key_exists($title, $renameChannels))
             $this->channel->setTitle($renameChannels[$title]);
 
-        $changeGroups = $this->handleConfig('changeGroups');
-        $changeGroups = $this->arrayKeysToLowerCase($changeGroups);
+        $changeGroups = ArrayHelper::arrayValuesChangeCase($this->config->get('changeGroups'));
         if (array_key_exists($title, $changeGroups))
             $this->channel->setGroup($changeGroups[$title]);
     }
 
     private function filterChannel() : bool
     {
-        $excludeChannels = $this->handleConfig('excludeChannels');
+        $excludeChannels = $this->config->get('excludeChannels');
         if (in_array($this->channel->getTitle(), $excludeChannels))
             return false;
 
-        $excludeGroups = $this->handleConfig('excludeGroups');
+        $excludeGroups = ArrayHelper::arrayValuesChangeCase($this->config->get('excludeGroups'));
         if (in_array($this->channel->getGroup(), $excludeGroups))
             return false;
 
@@ -130,18 +130,14 @@ class Playlist extends AFile
         });
     }
 
-    private function handleConfig($arrayName)
+    /**
+     * @return array
+     */
+    public function getChannels() : array
     {
-        return array_map('mb_strtolower', $this->config->get($arrayName));
+        return $this->channels;
     }
+    
 
-    private function arrayKeysToLowerCase(array $array) : array
-    {
-        $output = [];
-        foreach ($array as $key => $item) {
-            $output[mb_strtolower($key)] = $item;
-        }
-        return $output;
-    }
 
 }

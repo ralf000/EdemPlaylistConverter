@@ -6,3 +6,5 @@ composer.phar
 logs
 security
 .htaccess
+xmltv.xml.gz
+xmltv.xml

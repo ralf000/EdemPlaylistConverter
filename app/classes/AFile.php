@@ -36,8 +36,6 @@ abstract class AFile
         $this->path = $path;
     }
 
-    abstract public function handle();
-
     /**
      * @param $descriptor
      * @return bool

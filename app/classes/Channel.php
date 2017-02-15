@@ -3,6 +3,8 @@
 namespace app\classes;
 
 
+use app\components\helpers\MbString;
+
 class Channel
 {
     /**
@@ -17,11 +19,12 @@ class Channel
 
     /**
      * Channel constructor.
-     * @param array $channel [title => 'title', group => 'group', url => 'url']
+     * @param array $channel 
+     * [title => 'title', group => 'group', url => 'url']
      */
     public function __construct(array $channel)
     {
-        $this->channel = array_map('mb_strtolower', $channel);
+        $this->channel = $channel;
     }
 
     /**
@@ -31,8 +34,8 @@ class Channel
     public function convert() : string
     {
         return strtr($this->template, [
-            '{group}' => $this->channel['group'],
-            '{title}' => $this->mb_ucwords($this->channel['title']),
+            '{group}' => MbString::mb_ucfirst($this->channel['group']),
+            '{title}' => $this->channel['title'],
             '{url}' => $this->channel['url'],
         ]);
     }
@@ -68,12 +71,5 @@ class Channel
     {
         $this->channel['group'] = $group;
     }
-
-    private function mb_ucwords($str)
-    {
-        $str = mb_convert_case($str, MB_CASE_TITLE, "UTF-8");
-        return ($str);
-    }
-
 
 }

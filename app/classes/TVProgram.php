@@ -11,7 +11,7 @@ use Noodlehaus\Config;
 /**
  * Class TVProgram
  */
-class TVProgram extends AFile implements ICreatable
+class TVProgram extends AFile implements ICreating
 {
     /**
      * @var string
@@ -84,8 +84,6 @@ class TVProgram extends AFile implements ICreatable
     {
         $this->gzUnzip();
         $xml = simplexml_load_file($xmlTvPath);
-        if (!$xml)
-            throw new FileException('Не удалось открыть ' . $this->outputTVName);
         return $xml;
     }
 
@@ -97,13 +95,15 @@ class TVProgram extends AFile implements ICreatable
     {
         $dates = [];
         $xml = $this->getXml($this->outputTVPath);
+        if (!$xml)
+            return false;
         foreach ($xml as $item) {
             /**
              * @var \SimpleXMLElement $item
              */
             if (!$item->{'title'})
                 continue;
-            $date[] = mb_substr($item->attributes()->start, 0, 8);
+            $dates[] = mb_substr($item->attributes()->start, 0, 8);
         }
         $minDate = new \DateTime(min($dates));
         $maxDate = new \DateTime(max($dates));
@@ -126,8 +126,7 @@ class TVProgram extends AFile implements ICreatable
      * @param array $withoutProgram
      * @return string
      */
-    private
-    function showChannelsWithoutProgram(array $withoutProgram) : string
+    private function showChannelsWithoutProgram(array $withoutProgram) : string
     {
         if (empty($withoutProgram)) {
             $output = '<h3>Для всех телеканалов текущего плейлиста доступна телепрограмма</h3>';
@@ -145,8 +144,7 @@ class TVProgram extends AFile implements ICreatable
     /**
      * @throws FileException
      */
-    private
-    function gzUnzip()
+    private function gzUnzip()
     {
         $tvInput = gzopen($this->path, 'r');
         $tvOutput = fopen($this->outputTVPath, 'w');
@@ -163,8 +161,7 @@ class TVProgram extends AFile implements ICreatable
     /**
      * @return array
      */
-    private
-    function getPlaylistChannels() : array
+    private function getPlaylistChannels() : array
     {
         $playlist = new Playlist();
         $playlist->create();

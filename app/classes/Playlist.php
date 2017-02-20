@@ -9,7 +9,7 @@ use app\components\helpers\MbString;
 use app\components\logger\Logger;
 use Noodlehaus\Config;
 
-class Playlist extends AFile implements ICreatable
+class Playlist extends AFile implements ICreating
 {
     /**
      * @var Channel
@@ -42,6 +42,9 @@ class Playlist extends AFile implements ICreatable
     }
 
 
+    /**
+     * Создает новый плейлист
+     */
     public function create()
     {
         while (!feof($this->descriptor)) {
@@ -73,10 +76,13 @@ class Playlist extends AFile implements ICreatable
 
         $this->addAdditionalChannels();
         $this->sort(SORT_ASC);
-        $this->createPlaylist();
+        $this->writeDataToPlaylist();
     }
 
-    private function createPlaylist()
+    /**
+     * Записывает сформированные каналы в файл плейлиста
+     */
+    private function writeDataToPlaylist()
     {
         $playlistName = $this->config->get('main.outputPlaylistName');
         $playlistPath = __DIR__ . '/../../' . $playlistName;
@@ -92,6 +98,9 @@ class Playlist extends AFile implements ICreatable
         App::get('logger')->successCreatePlaylistLog($this->channelCounter, count($this->channels));
     }
 
+    /**
+     * Переименовывает каналы и меняет их группы
+     */
     private function changeChannelAttribute()
     {
         $title = $this->channel->getTitle();
@@ -105,6 +114,10 @@ class Playlist extends AFile implements ICreatable
             $this->channel->setGroup($changeGroups[$title]);
     }
 
+    /**
+     * Фильтрует каналы
+     * @return bool
+     */
     private function filterChannel() : bool
     {
         $excludeChannels = $this->config->get('excludeChannels');
@@ -118,6 +131,9 @@ class Playlist extends AFile implements ICreatable
         return true;
     }
 
+    /**
+     * Добавляет дополнительные каналы
+     */
     private function addAdditionalChannels()
     {
         $additionalChannels = $this->config->get('additionalChannels');
@@ -128,8 +144,12 @@ class Playlist extends AFile implements ICreatable
         }
     }
 
-    private
-    function sort($sortDirection)
+    /**
+     * Сортирует каналы
+     * @param $sortDirection
+     * @return bool
+     */
+    private function sort($sortDirection)
     {
         return usort($this->channels, function ($a, $b) use ($sortDirection) {
             /**
@@ -146,8 +166,7 @@ class Playlist extends AFile implements ICreatable
     /**
      * @return array
      */
-    public
-    function getChannels() : array
+    public function getChannels() : array
     {
         return $this->channels;
     }

@@ -44,5 +44,6 @@ return ['excludeChannels' =>
         'РБК',
         'Toot',
         'Мир',
+        'Матч! HD',
     ]
 ];

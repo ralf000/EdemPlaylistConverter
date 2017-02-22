@@ -30,7 +30,7 @@ class TVProgram extends AFile implements ICreating
     {
         $this->path = App::get('config')->get('main.inputTVProgram');
         $this->outputTVName = App::get('config')->get('main.outputTVProgramName');
-        $this->outputTVPath = __DIR__ . '/../../../' . $this->outputTVName;
+        $this->outputTVPath = __DIR__ . '/../../' . $this->outputTVName;
         parent::__construct($this->path);
     }
 
@@ -44,6 +44,7 @@ class TVProgram extends AFile implements ICreating
             $InputTVGzData = file_get_contents($this->getReserveTvProgramPath());
         $outputTVGzPath = $this->outputTVPath . '.gz';
         file_put_contents($outputTVGzPath, $InputTVGzData);
+        $this->delete($this->outputTVPath);
     }
 
     /**
@@ -107,6 +108,7 @@ class TVProgram extends AFile implements ICreating
         }
         $minDate = new \DateTime(min($dates));
         $maxDate = new \DateTime(max($dates));
+        $now = new \DateTime();
         $now = new \DateTime();
         if (($now < $maxDate) && ($now > $minDate))
             return true;

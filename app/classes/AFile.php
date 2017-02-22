@@ -52,10 +52,7 @@ abstract class AFile
      */
     protected function delete($path) : bool
     {
-        if (!unlink($path))
-            throw new FileException('Не могу удалить файл');
-        else
-            return true;
+        return unlink($path) ? true : false;
     }
 
 

@@ -75,7 +75,8 @@ class Playlist extends AFile implements ICreating
         $this->close($this->descriptor);
 
         $this->addAdditionalChannels();
-        $this->sort(SORT_ASC);
+        $this->sortChannels();
+        $this->sortGroups();
         $this->writeDataToPlaylist();
     }
 
@@ -146,21 +147,36 @@ class Playlist extends AFile implements ICreating
 
     /**
      * Сортирует каналы
-     * @param $sortDirection
+     * @param $direction
      * @return bool
      */
-    private function sort($sortDirection)
+    private function sortChannels($direction = SORT_ASC)
     {
-        return usort($this->channels, function ($a, $b) use ($sortDirection) {
+        return usort($this->channels, function ($a, $b) use ($direction) {
             /**
              * @var Channel $a
              * @var Channel $b
              */
-            if ($sortDirection === SORT_ASC)
+            if ($direction === SORT_ASC)
                 return $a->getTitle() <=> $b->getTitle();
             else
                 return $b->getTitle() <=> $a->getTitle();
         });
+    }
+
+    private function sortGroups()
+    {
+        $output = [];
+        foreach ($this->config->get('groupOrder') as $group) {
+            foreach ($this->channels as $channel) {
+                /**
+                 * @var Channel $channel
+                 */
+                if (mb_strtolower($channel->getGroup() === mb_strtolower($group)))
+                    $output[] = $channel;
+            }
+        }
+        $this->channels = $output;
     }
 
     /**

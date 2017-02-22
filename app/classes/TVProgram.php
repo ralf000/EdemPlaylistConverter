@@ -14,14 +14,19 @@ use Noodlehaus\Config;
 class TVProgram extends AFile implements ICreating
 {
     /**
-     * @var string
+     * @var string xmlTv.xml.gz
      */
     private $outputTVName = '';
 
     /**
-     * @var string
+     * @var string path/xmlTv.xml
      */
     private $outputTVPath = '';
+
+    /**
+     * @var string path/xmlTv.xml.gz
+     */
+    private $outputTVGzPath = '';
 
     /**
      * TVProgram constructor.
@@ -29,9 +34,10 @@ class TVProgram extends AFile implements ICreating
     public function __construct()
     {
         $this->path = App::get('config')->get('main.inputTVProgram');
+        parent::__construct($this->path);
         $this->outputTVName = App::get('config')->get('main.outputTVProgramName');
         $this->outputTVPath = __DIR__ . '/../../' . $this->outputTVName;
-        parent::__construct($this->path);
+        $this->outputTVGzPath = $this->outputTVPath . '.gz';
     }
 
     /**
@@ -39,12 +45,18 @@ class TVProgram extends AFile implements ICreating
      */
     public function create()
     {
-        $InputTVGzData = file_get_contents($this->path);
-        if (!$InputTVGzData || !$this->checkCorrectlyDate())
-            $InputTVGzData = file_get_contents($this->getReserveTvProgramPath());
-        $outputTVGzPath = $this->outputTVPath . '.gz';
-        file_put_contents($outputTVGzPath, $InputTVGzData);
+        $inputTVGzData = file_get_contents($this->path);
+        if (!$this->save($inputTVGzData) || !$this->checkCorrectlyDate()) {
+            $inputTVGzData = file_get_contents($this->getReserveTvProgramPath());
+            if (!$this->save($inputTVGzData))
+                throw new FileException('Не удалось сохранить файл телепрограммы');
+        }
         $this->delete($this->outputTVPath);
+    }
+
+    private function save(string $data = '')
+    {
+        return ($data) ? file_put_contents($this->outputTVGzPath, $data) : false;
     }
 
     /**
@@ -53,7 +65,11 @@ class TVProgram extends AFile implements ICreating
      */
     public function check()
     {
-        $xml = $this->getXml($this->outputTVPath);
+        $this->create();
+        $xml = $this->getSimpleXml();
+        if (!$xml)
+            throw new FileException('Не удалось открыть файл ' . $this->outputTVPath);
+
         $xmlChannels = [];
         foreach ($xml as $item) {
             /**
@@ -77,15 +93,14 @@ class TVProgram extends AFile implements ICreating
     }
 
     /**
-     * @param string $xmlTvPath
      * @return \SimpleXMLElement
      * @throws FileException
      */
-    private function getXml(string $xmlTvPath) : \SimpleXMLElement
+    private function getSimpleXml() : \SimpleXMLElement
     {
-        $this->gzUnzip();
-        $xml = simplexml_load_file($xmlTvPath);
-        return $xml;
+        $xmlTv = $this->gzUnzip();
+        $simpleXml = simplexml_load_file($this->outputTVPath);
+        return $simpleXml;
     }
 
     /**
@@ -95,7 +110,7 @@ class TVProgram extends AFile implements ICreating
     private function checkCorrectlyDate() : bool
     {
         $dates = [];
-        $xml = $this->getXml($this->outputTVPath);
+        $xml = $this->getSimpleXml();
         if (!$xml)
             return false;
         foreach ($xml as $item) {
@@ -108,7 +123,6 @@ class TVProgram extends AFile implements ICreating
         }
         $minDate = new \DateTime(min($dates));
         $maxDate = new \DateTime(max($dates));
-        $now = new \DateTime();
         $now = new \DateTime();
         if (($now < $maxDate) && ($now > $minDate))
             return true;
@@ -131,7 +145,7 @@ class TVProgram extends AFile implements ICreating
     private function showChannelsWithoutProgram(array $withoutProgram) : string
     {
         if (empty($withoutProgram)) {
-            $output = '<h3>Для всех телеканалов текущего плейлиста доступна телепрограмма</h3>';
+            $output = '<h3>Телепрограмма доступна для всех телеканалов текущего плейлиста</h3>';
         } else {
             $output = '<h3>Телепрограмма не найдена для следующих телеканалов:</h3>';
             $output .= '<ul>';
@@ -148,16 +162,16 @@ class TVProgram extends AFile implements ICreating
      */
     private function gzUnzip()
     {
-        $tvInput = gzopen($this->path, 'r');
+        $tvInput = gzopen($this->outputTVGzPath, 'r');
         $tvOutput = fopen($this->outputTVPath, 'w');
         if (!$tvInput || !$tvOutput)
             throw new FileException('Не удалось открыть один или несколько файлов телепрограммы');
-
         while (($line = fgets($tvInput)) !== FALSE) {
             fwrite($tvOutput, $line);
         }
         $this->close($tvInput);
         $this->close($tvOutput);
+        return true;
     }
 
     /**
